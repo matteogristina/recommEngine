@@ -1,0 +1,35 @@
+# Ignore macOS-specific files
+**/.DS_Store
+
+# Ignore Python virtual environments
+.venv/
+env/
+venv/
+
+# Ignore Python bytecode and cache files
+__pycache__/
+*.pyc
+
+# Ignore editor-specific files
+.idea/
+.vscode/
+
+# Ignore log and temporary files
+*.log
+*.tmp
+logs/
+tmp/
+
+# Ignore the Docker named volumes.
+# The data in these volumes is managed by Docker, not Git.
+postgres_data/
+redis_data/
+
+# Ignore your raw data and images.
+# This is crucial! You should never commit large, raw data files to Git.
+data/
+
+# Ignore any specific container-related temporary files
+.dockerignore
+Dockerfile
+docker-compose.yml
