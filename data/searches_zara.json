@@ -1,0 +1,150 @@
+[
+    {
+        "terms": "jackets",
+        "section": "MAN"
+    },
+    {
+        "terms": "puffers",
+        "section": "MAN"
+    },
+    {
+        "terms": "pants",
+        "section": "MAN"
+    },
+    {
+        "terms": "jeans",
+        "section": "MAN"
+    },
+    {
+        "terms": "sweaters",
+        "section": "MAN"
+    },
+    {
+        "terms": "cardigans",
+        "section": "MAN"
+    },
+    {
+        "terms": "hoodies",
+        "section": "MAN"
+    },
+    {
+        "terms": "sweatshirts",
+        "section": "MAN"
+    },
+    {
+        "terms": "t-shirts",
+        "section": "MAN"
+    },
+    {
+        "terms": "overshirts",
+        "section": "MAN"
+    },
+    {
+        "terms": "linen",
+        "section": "MAN"
+    },
+    {
+        "terms": "shorts",
+        "section": "MAN"
+    },
+    {
+        "terms": "suits",
+        "section": "MAN"
+    },
+    {
+        "terms": "cargo",
+        "section": "MAN"
+    },
+    {
+        "terms": "blazers",
+        "section": "MAN"
+    },
+    {
+        "terms": "tracksuits",
+        "section": "MAN"
+    },
+    {
+        "terms": "coats",
+        "section": "MAN"
+    },
+    {
+        "terms": "shoes",
+        "section": "MAN"
+    },
+    {
+        "terms": "bags",
+        "section": "MAN"
+    },
+    {
+        "terms": "backpack",
+        "section": "MAN"
+    },
+    {
+        "terms": "blazers",
+        "section": "WOMAN"
+    },
+    {
+        "terms": "jackets",
+        "section": "WOMAN"
+    },
+    {
+        "terms": "dresses",
+        "section": "WOMAN"
+    },
+    {
+        "terms": "skirts",
+        "section": "WOMAN"
+    },
+    {
+        "terms": "cardigans",
+        "section": "WOMAN"
+    },
+    {
+        "terms": "sweaters",
+        "section": "WOMAN"
+    },
+    {
+        "terms": "tops",
+        "section": "WOMAN"
+    },
+    {
+        "terms": "bodysuits",
+        "section": "WOMAN"
+    },
+    {
+        "terms": "t-shirts",
+        "section": "WOMAN"
+    },
+    {
+        "terms": "jeans",
+        "section": "WOMAN"
+    },
+    {
+        "terms": "pants",
+        "section": "WOMAN"
+    },
+    {
+        "terms": "shoes",
+        "section": "WOMAN"
+    },
+    {
+        "terms": "knitwear",
+        "section": "WOMAN"
+    },
+    {
+        "terms": "sweatshirts",
+        "section": "WOMAN"
+    },
+    {
+        "terms": "coats",
+        "section": "WOMAN"
+    },
+    {
+        "terms": "shorts",
+        "section": "WOMAN"
+    },
+    {
+        "terms": "bags",
+        "section": "WOMAN"
+    }
+]
