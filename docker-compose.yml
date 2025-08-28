@@ -1,0 +1,79 @@
+services:
+  # Our relational database for the main product catalog
+  postgres_db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: recommender_db
+    ports:
+      - "5432:5432"
+    # ADDED: This block defines a health check
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      # Named volume for persistent data. This is what you already have.
+      - postgres_data:/var/lib/postgresql/data
+      # Bind mount for the initialization script. This is what you need to add.
+      - ./init-scripts/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+  
+  # A new service to run your ingestion script
+  data_ingestion:
+    build:
+      context: ./services/data_ingestion
+      dockerfile: Dockerfile
+    volumes:
+      - ./data:/app/data
+    # MODIFIED: Wait for the database to be healthy before starting this service
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    command: ["python", "-u", "ingest.py"]
+  image_server:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "8000:80"
+    volumes:
+      - ./data:/usr/share/nginx/html
+
+  zookeeper:
+    image: zookeeper:3.8
+    restart: always
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888;2181
+  
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    restart: always
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      - zookeeper
+
+  redis_cache:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+# Volumes ensure our data persists even if the containers are stopped or removed
+volumes:
+  postgres_data:
+  redis_data:
