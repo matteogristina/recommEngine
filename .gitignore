@@ -27,9 +27,8 @@ redis_data/
 
 # Ignore your raw data and images.
 # This is crucial! You should never commit large, raw data files to Git.
-data/images/
+/data/*
+!data/articles_mini.csv
+!data/customers_mini.csv
+!data/transactions_mini.csv
 
-# Ignore any specific container-related temporary files
-.dockerignore
-Dockerfile
-docker-compose.yml
