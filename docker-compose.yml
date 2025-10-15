@@ -20,26 +20,6 @@ services:
       - postgres_data:/var/lib/postgresql/data
       # Bind mount for the initialization script. This is what you need to add.
       - ./init-scripts/schema.sql:/docker-entrypoint-initdb.d/schema.sql
-  
-  # A new service to run your ingestion script
-  data_ingestion:
-    build:
-      context: ./services/data_ingestion
-      dockerfile: Dockerfile
-    volumes:
-      - ./data:/app/data
-    # MODIFIED: Wait for the database to be healthy before starting this service
-    depends_on:
-      postgres_db:
-        condition: service_healthy
-    command: ["python", "-u", "ingest.py"]
-  image_server:
-    image: nginx:alpine
-    restart: always
-    ports:
-      - "8000:80"
-    volumes:
-      - ./data:/usr/share/nginx/html
 
   zookeeper:
     image: zookeeper:3.8
@@ -60,10 +40,16 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
       - zookeeper
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   redis_cache:
     image: redis:7-alpine
@@ -72,6 +58,82 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping || exit 1"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+      start_period: 3s
+
+  
+  # A new service to run your ingestion script
+  data_ingestion:
+    build:
+      context: ./services/data_ingestion
+      dockerfile: Dockerfile
+    volumes:
+      - ./data:/app/data
+    # MODIFIED: Wait for the database to be healthy before starting this service
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    command: ["python", "-u", "ingest.py"]
+  image_server:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "8000:80"
+    volumes:
+      - ./data:/usr/share/nginx/html
+   
+  event_generator:
+    build:
+      context: ./services/event_generator
+    restart: "no"
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+        
+  stream_processor:
+    build:
+      context: ./services/stream_processor
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis_cache:
+        condition: service_healthy
+    restart: on-failure # Restarts if the process crashes
+#    environment:
+#      - PYTHONUNBUFFERED=1 # To see real-time log output
+
+  training_service:
+    build:
+      context: ./services/training_service
+    restart: "no"
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    # We need a dedicated volume to store the model artifacts
+    volumes:
+      - ./model_artifacts:/app/model_artifacts 
+    command: python train_model.py
+    
+  rec_api:
+    build:
+      context: ./services/rec_api
+    restart: always
+    # Expose the API port externally for your demo portal/browser to connect
+    ports:
+      - "8001:8001"
+    # --- CRITICAL: Mount the model artifacts volume ---
+    volumes:
+      - ./model_artifacts:/app/model_artifacts
+    depends_on:
+      redis_cache:
+        condition: service_healthy # The API must wait for the real-time feature store
+
 
 # Volumes ensure our data persists even if the containers are stopped or removed
 volumes:
