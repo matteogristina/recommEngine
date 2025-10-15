@@ -10,7 +10,7 @@ from lightfm.data import Dataset  # Important for LightFM feature management
 from typing import Tuple, Dict, Any
 
 # --- CONFIGURATION ---
-ARTIFACTS_DIR = os.getenv("ARTIFACTS_DIR", "/app/model_artifacts")
+ARTIFACTS_DIR = os.getenv("ARTIFACTS_DIR")
 MODEL_FILE = os.path.join(ARTIFACTS_DIR, "hybrid_model.joblib")
 ITEM_EMBEDDINGS_FILE = os.path.join(ARTIFACTS_DIR, "item_embeddings.npy")
 USER_EMBEDDINGS_FILE = os.path.join(ARTIFACTS_DIR, "user_embeddings.npy")
@@ -27,10 +27,10 @@ def get_db_connection():
     try:
         # DB_HOST is 'postgres_db' in the Docker network
         conn = psycopg2.connect(
-            host=os.getenv("DB_HOST", "postgres_db"),
-            database=os.getenv("DB_NAME", "recommender_db"),
-            user=os.getenv("DB_USER", "user"),
-            password=os.getenv("DB_PASSWORD", "password")
+            host=os.getenv("DB_HOST"),
+            database=os.getenv("DB_NAME"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD")
         )
         return conn
     except psycopg2.Error as e:

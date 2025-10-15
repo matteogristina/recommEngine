@@ -6,7 +6,7 @@ from confluent_kafka import Producer
 
 # Configuration for the Kafka Producer
 conf = {
-    'bootstrap.servers': os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'kafka:9092'),
+    'bootstrap.servers': os.getenv('KAFKA_BOOTSTRAP_SERVERS'),
     'client.id': 'event-generator'
 }
 producer = Producer(conf)
@@ -18,10 +18,10 @@ def get_db_connection():
     """
     try:
         connection = psycopg2.connect(
-            host=os.getenv("DB_HOST", "postgres_db"),
-            database=os.getenv("DB_NAME", "recommender_db"),
-            user=os.getenv("DB_USER", "user"),
-            password=os.getenv("DB_PASSWORD", "password")
+            host=os.getenv("DB_HOST"),
+            database=os.getenv("DB_NAME"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD")
         )
         return connection
     except psycopg2.Error as e:
@@ -90,7 +90,7 @@ def produce_events(prod, topic, connect):
 
 if __name__ == "__main__":
     conn = None
-    KAFKA_TOPIC = os.getenv('KAFKA_TOPIC', 'user_events')
+    KAFKA_TOPIC = os.getenv('KAFKA_TOPIC')
     try:
         conn = get_db_connection()
         # Corrected function call with the proper arguments

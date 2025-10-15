@@ -6,7 +6,7 @@ from confluent_kafka import Consumer, KafkaException
 
 # Configuration for the Kafka Consumer
 conf = {
-    'bootstrap.servers': os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'kafka:9092'),
+    'bootstrap.servers': os.getenv('KAFKA_BOOTSTRAP_SERVERS'),
     'group.id': 'stream-processor-group',
     'auto.offset.reset': 'earliest'  # Start reading from the beginning of the topic
 }
@@ -14,8 +14,8 @@ consumer = Consumer(conf)
 
 # Configuration for the Redis client
 redis_client = redis.Redis(
-    host=os.getenv('REDIS_HOST', 'redis_cache'),
-    port=os.getenv('REDIS_PORT', '6379'),
+    host=os.getenv('REDIS_HOST'),
+    port=os.getenv('REDIS_PORT'),
     decode_responses=True  # Decodes responses to strings
 )
 
@@ -46,7 +46,7 @@ def process_event(event):
 
 
 if __name__ == '__main__':
-    KAFKA_TOPIC = os.getenv('KAFKA_TOPIC', 'user_events')
+    KAFKA_TOPIC = os.getenv('KAFKA_TOPIC')
 
     try:
         # Check Redis connection
