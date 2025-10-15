@@ -1,62 +1,52 @@
-# Fashion Recommendation Engine
+# Real-Time Event Processing & Hybrid AI Search Platform
 
-This project is a microservices-based system designed to simulate a real-world, data-driven recommendation engine for an e-commerce fashion storefront. It demonstrates core skills in distributed systems, data engineering, and machine learning operations (MLOps) by building a complete end-to-end pipeline.
+This project is a microservices-based system designed to simulate a high-volume, production-grade recommendation engine. It serves as a comprehensive demonstration of expertise in **Real-Time Distributed Systems, MLOps, and Advanced AI Search Algorithms.**
 
-The project has successfully completed its foundational data ingestion phase and is now a robust, Docker-based environment ready to process real-time user data.
+The system is fully deployed via Docker and currently hosts a trained Hybrid Recommendation Model ready for low-latency inference.
 
-## Project Goals
+## Project Goals (MLOps & Search Focus)
 
-The primary goal of this project is to build an intelligent recommendation system from the ground up, showcasing a multi-faceted skill set required for a modern developer role. The key features to be implemented are:
+The core objective is to build an intelligent, scalable serving platform from the ground up, showcasing specialized skills required for a modern developer role.
 
-* **Content-Based Filtering:** Recommending items based on similarities in their attributes (e.g., brand, category, description).
-
-* **"Complete the Outfit" Search:** An advanced search feature that suggests complementary items to a user's shopping cart.
-
-* **Real-time Recommendations:** Providing dynamic recommendations based on a user's recent activity.
+* **Hybrid Prediction:** Combining long-term user taste (Collaborative Filtering) with immediate product attributes (Content-Based Filtering) to solve the **Cold-Start Problem**.
+* **Stochastic Search:** Implementing a ranking strategy that maximizes both conversion (exploitation) and product discovery (exploration).
+* **Low-Latency Serving:** Delivering predictions via a dedicated FastAPI microservice, leveraging Redis for sub-10ms feature lookups.
 
 ## Architecture & Technology Stack
 
-The system is built on an event-driven, containerized architecture.
+The system is built on an event-driven, containerized architecture designed for performance and horizontal scalability.
 
 * **Orchestration:** Docker Compose
-
+* **Serving:** **FastAPI** (Low-latency ML microservice)
 * **Databases:**
+    * **PostgreSQL:** Persistent storage for the product catalog and historical data.
+    * **Redis:** **High-speed Feature Store** for real-time user intent signals (e.g., last 10 viewed items).
+* **Messaging Queue:** Kafka (Durable log for real-time event streaming)
 
-  * **PostgreSQL:** Serves as the primary, persistent database for the product catalog.
+## Current Progress (Phase 3: Model Deployment Complete)
 
-  * **Redis:** Will be used as an in-memory, low-latency store for real-time features and user activity.
+**The entire ML serving pipeline is complete and operational.** The following components have been successfully implemented and tested:
 
-* **Messaging Queue:** Kafka (for real-time event streaming)
+* **Data Engineering Pipeline:**
+    * Robust ingestion of **37 Million** transactions, **1.3 Million** customers, and **100k** products.
+    * Memory-efficient **chunking logic** to handle multi-gigabyte files without crashing (solving the common OOM bottleneck).
 
-* **Data Ingestion:** A Python script for batch loading data into PostgreSQL.
+* **Real-Time Feature Generation:**
+    * The **Event Generator** successfully streams all 37M historical transactions to Kafka (simulating live user activity).
+    * The **Stream Processor** runs in parallel, consuming events and populating the **Redis Feature Store** with a sliding window of the user's 10 most recent interactions.
 
-* **Images:** A local web server to serve image files for the storefront mock.
+* **Hybrid Model Training & Deployment (The MLOps Deliverable):**
+    * **Model Training:** A **Hybrid Collaborative/Content Filtering Model** was trained using a temporal split, generating dense **Item and User Embedding Vectors**.
+    * **Artifact Persistence:** The trained model and all necessary mappings (`.joblib`, `.npy` files) are saved as versioned artifacts to a dedicated volume.
 
-## Current Progress (Phase 1: Planning & Data Layer)
+* **Low-Latency Recommendation API (Deployment):**
+    * A **FastAPI Microservice** is deployed, which loads the ML artifacts at startup.
+    * The API is ready to serve predictions, demonstrating model deployment experience.
 
-The following components have been successfully implemented, tested, and pushed to GitHub:
+## Next Steps (Phase 4: Validation & Finalization)
 
-* **Database Schema:** A normalized relational schema for a real-world dataset has been designed and is automatically created on startup. This includes dedicated tables for products, articles, customers, and a massive transaction history.
+The next phase will focus on testing the complexity of the deployed model and creating a compelling demonstrator for recruiters. This includes:
 
-* **Data Ingestion Pipeline:** A robust Python script (`ingest.py`) has been developed to handle the complexities of a large, real-world dataset. The pipeline:
-    * Processes and ingests data from three separate CSVs (100k articles, 1.3m customers, and over 31m transactions).
-    * Performs on-the-fly data cleaning and type-casting to handle inconsistencies.
-    * Uses a memory-efficient chunking method to ingest the multi-gigabyte transactions file without running out of memory.
-
-* **Local Infrastructure:** A `docker-compose.yml` file is configured to spin up the entire development environment, including:
-    * A PostgreSQL database with a persistent volume for data durability.
-    * A Redis cache.
-    * A Kafka broker and Zookeeper for message streaming.
-    * A Python-based `image_server` to serve local image files.
-
-* **Version Control:** All core code, configurations, and environment setup have been committed to the Git repository, ensuring the project is fully reproducible.
-
-## Next Steps (Phase 2: User Interaction & Real-time Pipeline)
-
-The next phase of the project will focus on building the real-time data pipeline to simulate live user activity. This includes:
-
-* **Event Generator:** Developing a Python service that replays the historical transaction data in chronological order and publishes it as a live event stream to Kafka.
-
-* **Stream Processor:** Building a new service that consumes these real-time events, processes them, and aggregates features for a real-time feature store.
-
-* **Real-time Feature Store:** Implementing the logic to store and retrieve aggregated user behavior data from Redis for use in the recommendation service.
+* **Final API Logic:** Implementing the `COLD_START` and `SIMILARITY` search modes (Cosine Similarity against item embeddings).
+* **Validation:** Creating the final test script to benchmark the model's MAP@12 performance against the reserved test set.
+* **Service Demonstrator:** Building a simple web interface to visually showcase the generalized API's functions (`CROSS_SELL`, `SIMILARITY`, and `REAL-TIME RECENCY`).
