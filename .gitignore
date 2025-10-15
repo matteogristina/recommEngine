@@ -1,3 +1,6 @@
+# Environment variables should never be committed
+.env
+
 # Ignore macOS-specific files
 **/.DS_Store
 
