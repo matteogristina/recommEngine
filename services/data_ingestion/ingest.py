@@ -47,7 +47,6 @@ def clean_prod_name(prod_name: str) -> str:
 
     return text
 
-
 def get_db_connection():
     """
     Establishes a connection to the PostgreSQL database using environment variables.
@@ -64,6 +63,23 @@ def get_db_connection():
     except psycopg2.Error as e:
         print(f"Error connecting to the database: {e}")
         sys.exit(1)
+
+def is_db_populated(conn) -> bool:
+    """
+    Checks if the 'transactions' table is already populated.
+    Returns True if populated, False otherwise.
+    """
+    try:
+        cur = conn.cursor()
+        # Execute the count query
+        cur.execute("SELECT count(*) FROM transactions;")
+        row_count = cur.fetchone()[0]
+        cur.close()
+        # If the count is greater than 0, assume the data is there
+        return row_count > 0
+    except (psycopg2.Error, Exception) as e:
+        print(f"Error checking database population status: {e}")
+        return False
 
 
 def ingest_articles(articles_df: pd.DataFrame, cur, conn):
@@ -123,7 +139,6 @@ def ingest_articles(articles_df: pd.DataFrame, cur, conn):
     conn.commit()
     print("Articles ingestion complete.")
 
-
 def ingest_customers(df: pd.DataFrame, cur, conn):
     """Ingests data from the customers.csv portion of the dataframe."""
     print("Starting ingestion of customers data...")
@@ -162,7 +177,6 @@ def ingest_customers(df: pd.DataFrame, cur, conn):
 
     conn.commit()
     print("Customers ingestion complete.")
-
 
 # Function to ingest data from the transactions.csv file
 def ingest_transactions(csv_file_path: str, cur, conn):
@@ -221,7 +235,6 @@ def ingest_transactions(csv_file_path: str, cur, conn):
 
     print("Transactions ingestion complete.")
 
-
 def main():
     """
     Main function to orchestrate the entire ingestion process.
@@ -231,28 +244,26 @@ def main():
     try:
         print("Getting connection...")
         conn = get_db_connection()
-        cur = conn.cursor()
 
-        print("Read articles...")
+        # Check if the database is already populated
+        if is_db_populated(conn):
+            print("Database already populated. Skipping data ingestion.")
+        else:
+            # If the database is not populated, proceed with ingestion
+            cur = conn.cursor()
 
-        # Load articles and customers as before (they are small enough)
-        articles_df = pd.read_csv('/app/data/articles.csv', dtype={'article_id': str}, engine='python')
+            print("Read articles...")
+            articles_df = pd.read_csv('/app/data/articles.csv', dtype={'article_id': str}, engine='python')
+            ingest_articles(articles_df, cur, conn)
 
-        # Step 1: Ingest articles data.
-        ingest_articles(articles_df, cur, conn)
+            print("Read customers...")
+            customers_df = pd.read_csv('/app/data/customers.csv', engine='python')
+            ingest_customers(customers_df, cur, conn)
 
-        print("Read customers...")
+            print("Ingesting transactions...")
+            ingest_transactions('/app/data/transactions_train.csv', cur, conn)
 
-        customers_df = pd.read_csv('/app/data/customers.csv', engine='python')
-
-        # Step 2: Ingest customer data.
-        ingest_customers(customers_df, cur, conn)
-
-        # Step 3: Ingest the transactions data using the new chunking function.
-        # Pass the file path directly instead of the DataFrame.
-        ingest_transactions('/app/data/transactions_train.csv', cur, conn)
-
-        print("All data ingestion completed successfully.")
+            print("All data ingestion completed successfully.")
 
     except (Exception, psycopg2.DatabaseError) as e:
         print(f"An error occurred during ingestion: {e}")

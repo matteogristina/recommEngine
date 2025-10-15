@@ -1,5 +1,5 @@
 # Use a lightweight Python base image.
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 # Install the necessary PostgreSQL development headers.
 # This provides 'pg_config' and other tools for building psycopg2.
