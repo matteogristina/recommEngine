@@ -201,23 +201,41 @@ def train_and_embed(matrices: Tuple[coo_matrix, coo_matrix, coo_matrix, Dataset]
 
 # Step 4: Save files to the mounted volume
 def save_artifacts(model, item_embeddings, user_embeddings, dataset):
-    """Saves the trained model, embedding matrices, and ID mappings (MLOps Artifacts)."""
+    """Saves the trained model, embedding matrices, and all required mappings (MLOps Artifacts)."""
     print(f"4. Saving model artifacts to {ARTIFACTS_DIR}...")
 
     # Ensure the artifacts directory exists
     os.makedirs(ARTIFACTS_DIR, exist_ok=True)
 
+    # --- 1. EXTRACT ALL NECESSARY MAPPINGS ---
+    # The dataset.mapping() returns (user_id_map, user_feature_map, item_id_map, item_feature_map)
+    user_id_map, user_feature_map, item_id_map, item_feature_map = dataset.mapping()
+
+    # Store only the necessary dictionaries for the API
+    feature_and_id_mappings = {
+        'user_id_to_index': user_id_map,
+        'item_id_to_index': item_id_map,
+        # Save the feature mappings needed for the Cold Start solution
+        'item_feature_to_index': item_feature_map,
+        'user_feature_to_index': user_feature_map,
+    }
+
+    # Define a new filename for the mappings artifact
+    MAPPINGS_FILE = os.path.join(ARTIFACTS_DIR, "inference_mappings.joblib")
+
+    # --- 2. SAVE THE ARTIFACTS ---
+
     # Save the model object
     joblib.dump(model, MODEL_FILE)
 
-    # --- CRITICAL ADDITION: Save the Dataset object which holds all mappings ---
-    joblib.dump(dataset, DATASET_FILE)
+    # Save the cleaned mapping dictionaries as the key inference artifact
+    joblib.dump(feature_and_id_mappings, MAPPINGS_FILE)
 
     # Save the embedding matrices (NumPy format)
     np.save(ITEM_EMBEDDINGS_FILE, item_embeddings)
     np.save(USER_EMBEDDINGS_FILE, user_embeddings)
 
-    print("   -> Artifacts saved: Model, Embeddings, and ID Mappings.")
+    print("   -> Artifacts saved: Model, Embeddings, and Inference Mappings.")
 
 
 if __name__ == "__main__":

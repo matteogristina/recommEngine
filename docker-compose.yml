@@ -71,6 +71,8 @@ services:
     build:
       context: ./services/data_ingestion
       dockerfile: Dockerfile
+    env_file:
+      - ./.env
     volumes:
       - ./data:/app/data
     # MODIFIED: Wait for the database to be healthy before starting this service
@@ -89,6 +91,8 @@ services:
   event_generator:
     build:
       context: ./services/event_generator
+    env_file:
+      - ./.env
     restart: "no"
     depends_on:
       postgres_db:
@@ -99,6 +103,8 @@ services:
   stream_processor:
     build:
       context: ./services/stream_processor
+    env_file:
+      - ./.env
     depends_on:
       kafka:
         condition: service_healthy
@@ -111,6 +117,8 @@ services:
   training_service:
     build:
       context: ./services/training_service
+    env_file:
+      - ./.env
     restart: "no"
     depends_on:
       postgres_db:
@@ -123,6 +131,8 @@ services:
   rec_api:
     build:
       context: ./services/rec_api
+    env_file:
+      - ./.env
     restart: always
     # Expose the API port externally for your demo portal/browser to connect
     ports:
